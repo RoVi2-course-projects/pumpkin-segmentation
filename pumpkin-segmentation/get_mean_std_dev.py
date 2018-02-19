@@ -34,30 +34,24 @@ def get_mean_st_dev(image_training, image_orig):
     mean_rgb, std_dev_rgb = cv2.meanStdDev(image_original_rgb, mask=mask_image)
     mean_hsv, std_dev_hsv = cv2.meanStdDev(image_original_hsv, mask=mask_image)
 
-    ################################################################
-    ## used to show working method by removing all but the pixels
-    ## with valid threshold values
-    # for RGB
-    min_rgb = np.array(mean_rgb - std_dev_rgb)
-    max_rgb = np.array(mean_rgb + std_dev_rgb)
-    mask_rgb = cv2.inRange(image_original_rgb,min_rgb,max_rgb)
-    result_rgb = cv2.bitwise_and(image_original_rgb, image_original_rgb,
-                                 mask=mask_rgb)
-    print_image(image_original_rgb, result_rgb,
-                "Original image and result image - RGB")
-
-    # for HSV
-    min_hsv = np.array(mean_hsv - std_dev_hsv)
-    max_hsv = np.array(mean_hsv + std_dev_hsv)
-    mask_hsv = cv2.inRange(image_original_hsv,min_hsv,max_hsv)
-    result_hsv = cv2.bitwise_and(image_original_hsv, image_original_hsv,
-                                 mask=mask_hsv)
-    print_image(image_original_hsv, result_hsv,
-                "Original image and result image - HSV")
-
+    # used for visual test
+    compare_result_image_with_original(mean_rgb, std_dev_rgb,
+                                       image_original_rgb, "RGB")
+    compare_result_image_with_original(mean_hsv, std_dev_hsv,
+                                       image_original_hsv, "HSV")
     plt.show()
-    ################################################################
     return mean_rgb, mean_hsv, std_dev_rgb, std_dev_hsv
+
+## used to show working method by removing all but the pixels
+## with valid threshold values
+def compare_result_image_with_original(mean, std_dev, original_image, name):
+    min_val = np.array(mean - std_dev)
+    max_val = np.array(mean + std_dev)
+    mask = cv2.inRange(original_image,min_val,max_val)
+    result = cv2.bitwise_and(original_image, original_image,
+                                 mask=mask)
+    print_image(original_image, result,
+                "Original image and result image - " + name)
 
 # threshold a specified color and return the original image
 # showing only the pixels within this range
