@@ -5,42 +5,59 @@ import numpy as np
 from scipy import misc
 import matplotlib.pyplot as plt
 
-def print_image(image, name):
+def print_image(image_orig, image_result, name):
     plt.figure(name)
-    plt.imshow(image)
+    plot_original = plt.subplot(2, 1, 1)
+    plot_original.imshow(image_orig)
+    plot = plt.subplot(2, 1, 2,
+                       sharex=plot_original, sharey=plot_original)
+    plt.imshow(image_result)
 
-def load_pictures_rgb(path):
+def load_pictures(path):
     img = cv2.imread(path)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    return img
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    return img_rgb, img_hsv
 
 def get_mean_st_dev(image_training, image_orig):
-    image_drawed = load_pictures_rgb(image_training)
-    image_original = load_pictures_rgb(image_orig)
+    image_drawed_rgb, image_drawed_hsv = load_pictures(image_training)
+    image_original_rgb, image_original_hsv = load_pictures(image_orig)
     # red color is used to draw on pumpkins in test image
     # thresholding in red channel
     min_rgb_thres = np.array([240, 0, 0])
     max_rgb_thres = np.array([255, 0, 0])
     color_chan = 0 # red (RGB)
     mask_image = get_masked_image(min_rgb_thres, max_rgb_thres,
-                                  image_drawed, image_original, color_chan)
+                                  image_drawed_rgb, image_original_rgb,
+                                  color_chan)
 
-    mean, std_dev = cv2.meanStdDev(image_original, mask=mask_image)
+    mean_rgb, std_dev_rgb = cv2.meanStdDev(image_original_rgb, mask=mask_image)
+    mean_hsv, std_dev_hsv = cv2.meanStdDev(image_original_hsv, mask=mask_image)
 
     ################################################################
     ## used to show working method by removing all but the pixels
     ## with valid threshold values
+    # for RGB
+    min_rgb = np.array(mean_rgb - std_dev_rgb)
+    max_rgb = np.array(mean_rgb + std_dev_rgb)
+    mask_rgb = cv2.inRange(image_original_rgb,min_rgb,max_rgb)
+    result_rgb = cv2.bitwise_and(image_original_rgb, image_original_rgb,
+                                 mask=mask_rgb)
+    print_image(image_original_rgb, result_rgb,
+                "Original image and result image - RGB")
 
-    # min_rgb = np.array(mean - std_dev)
-    # max_rgb = np.array(mean + std_dev)
-    # mask_rgb = cv2.inRange(image_original,min_rgb,max_rgb)
-    # result_rgb = cv2.bitwise_and(image_original, image_original, mask=mask_rgb)
-    # print_image(image_original, "Original image")
-    # print_image(result_rgb, "Result for part 1")
-    # plt.show()
+    # for HSV
+    min_hsv = np.array(mean_hsv - std_dev_hsv)
+    max_hsv = np.array(mean_hsv + std_dev_hsv)
+    mask_hsv = cv2.inRange(image_original_hsv,min_hsv,max_hsv)
+    result_hsv = cv2.bitwise_and(image_original_hsv, image_original_hsv,
+                                 mask=mask_hsv)
+    print_image(image_original_hsv, result_hsv,
+                "Original image and result image - HSV")
 
+    plt.show()
     ################################################################
-    return mean, std_dev
+    return mean_rgb, mean_hsv, std_dev_rgb, std_dev_hsv
 
 # threshold a specified color and return the original image
 # showing only the pixels within this range
@@ -48,13 +65,17 @@ def get_masked_image(min_thres, max_thres, image_drawed,
                      image_original, color_channel):
     mask_rgb = cv2.inRange(image_drawed,min_thres,max_thres)
     # this will return only the pixels which are drawed manually
-    result_rgb = cv2.bitwise_and(image_original, image_original, mask=mask_rgb)
+    result_rgb = cv2.bitwise_and(image_original, image_original,
+                                 mask=mask_rgb)
     return mask_rgb
 
 if __name__ == "__main__":
     path_to_training_image = "photos/DJI_0237_copy.JPG"
     path_to_original_image = "photos/DJI_0237.JPG"
-    mean, std_dev = get_mean_st_dev(path_to_training_image,
+    mean_rgb, mean_hsv, std_dev_rgb, std_dev_hsv = get_mean_st_dev(path_to_training_image,
                                     path_to_original_image)
-    print mean
-    print std_dev
+    print "Mean RGB\n" + str(mean_rgb)
+    print "StdDev RGB\n" + str(std_dev_rgb)
+
+    print "\n\nMean HSV\n" + str(mean_hsv)
+    print "StdDev HSV\n" + str(std_dev_hsv)
