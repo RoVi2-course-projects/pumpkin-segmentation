@@ -70,7 +70,7 @@ def get_masked_image(min_thres, max_thres, image_drawed,
     return mask_rgb
 
 if __name__ == "__main__":
-    path_to_training_image = "photos/DJI_0237_copy.JPG"
+    path_to_training_image = "photos/DJI_0237_copy_better.png"
     path_to_original_image = "photos/DJI_0237.JPG"
     mean_rgb, mean_hsv, std_dev_rgb, std_dev_hsv = get_mean_st_dev(path_to_training_image,
                                     path_to_original_image)
