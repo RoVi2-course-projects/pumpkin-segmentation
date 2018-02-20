@@ -22,7 +22,7 @@ def get_property_from_file(image, property):
     return float(altitude)
 
 
-def get_image_area(img_path):
+def get_image_area_and_gsd(img_path):
     with Image.open(img_path) as image:
         altitude = get_property_from_file(image, "altitude")
         image_width = image.width
@@ -39,21 +39,22 @@ def get_image_area(img_path):
     # Find the number of meters per pixel, applying geometry formulas
     # with the camera parameters.
     image_real_width = 2 * np.tan(fov/2) * altitude
-    pixel_width = image_real_width / image_width
+    gsd = image_real_width / image_width
     # Assuming that the pixel height and width are equal, find the image
     # total height.
-    image_real_height = pixel_width * image_height
+    image_real_height = gsd * image_height
     image_area = image_real_height * image_real_width
-    return image_area
+    return (image_area, gsd)
 
 
-def get_gsd(img_path, pumpkins):
-    area = get_image_area(img_path)
+def get_density(img_path, pumpkins):
+    area, gsd = get_image_area_and_gsd(img_path)
     density = pumpkins / area
-    return density
+    return (density, gsd)
 
 
 if __name__ == '__main__':
-    density  = get_gsd('./photos/DJI_0237.JPG', pumpkins=2700)
+    density, gsd  = get_density('./photos/DJI_0237.JPG', pumpkins=2700)
+    print("The Ground sample distance (GSD) is {0:.4f} m/px".format(gsd))
     print("Assuming there are 10000 pumpkins in the field, the density"
           " is {0:.2f} pumpkins/m^2".format(density))
