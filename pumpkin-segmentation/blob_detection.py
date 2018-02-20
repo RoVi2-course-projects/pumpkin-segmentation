@@ -5,11 +5,30 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def estimatePumpkins(contours, total_area):
+    #calculating mean area for a pumpkin
+    mean_area = total_area/len(filtered_contours)
+    
+    #estimating number of pumpkins based on mean area
+    estimated_pumpkins_nr = 0
+    
+    for contour in filtered_contours:
+        area = cv2.contourArea(contour)
+        
+        if area > mean_area:
+            estimated_pumpkins_nr = estimated_pumpkins_nr + int(round(area/mean_area))
+        else:
+            estimated_pumpkins_nr = estimated_pumpkins_nr + 1
+            
+    return estimated_pumpkins_nr
+
 if __name__ == "__main__":
-    #Read the color based segemented image
+    
+    #Read original photo
     imageBGR = cv2.imread("./photos/DJI_0237.JPG")
     imageRGB = cv2.cvtColor(imageBGR, cv2.COLOR_BGR2RGB)
 
+    #Read color based segemented image
     binaryImage = 255*cv2.imread("photos/result.png", 0)
 
     #Morphological filtering to seprate joint groups and get rid of the noise
@@ -21,21 +40,24 @@ if __name__ == "__main__":
    
     #Filter detected contours, save the remaing in filtered_contours array
     filtered_contours = []
+    total_area = 0
 
     for contour in contours:
         area = cv2.contourArea(contour)
-        print(area)
         
         if area > 50:
-            print("big enough!")
+            total_area = total_area + area
             filtered_contours.append(contour)            
-            
+    
+    pumpkins_estimated = estimatePumpkins(filtered_contours, total_area)
+ 
     #Draw contours of groups expected to be pumpkins
     cv2.drawContours(imageRGB, filtered_contours, -1, (0, 0, 255), 3)
     
-    #Reduction of size of the contours in filtering process
-    print(len(contours))  
-    print(len(filtered_contours))  
+    #Priting out: number of contours and pumpkins
+    print("Number of contours detected: %d" % len(contours))  
+    print("Number of pumpkins detected: %d" % len(filtered_contours))
+    print("Number of pumpkins estimated based on mean area: %d" % pumpkins_estimated)
 
     #Print the image
     plt.figure("name of the figure")
@@ -43,5 +65,5 @@ if __name__ == "__main__":
     plt.show()
     
     #Write the image
-    cv2.imwrite("./photos/result.png", imageRGB)
+    cv2.imwrite("./photos/blob_detection.png", imageRGB)
 

@@ -10,7 +10,7 @@ def main():
     # Read photo
     image = cv2.imread("./photos/DJI_0237.JPG")
     # Binarize the image.
-    binarized = binarization.bgr_binarization(image)
+    binarized = binarization.hsv_binarization(image)
     cv2.imwrite("./photos/result.png", 255*binarized)
     return
 
