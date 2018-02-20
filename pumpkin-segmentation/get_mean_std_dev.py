@@ -26,10 +26,8 @@ def get_mean_st_dev(image_training, image_orig):
     # thresholding in red channel
     min_rgb_thres = np.array([240, 0, 0])
     max_rgb_thres = np.array([255, 0, 0])
-    color_chan = 0 # red (RGB)
     mask_image = get_masked_image(min_rgb_thres, max_rgb_thres,
-                                  image_drawed_rgb, image_original_rgb,
-                                  color_chan)
+                                  image_drawed_rgb, image_original_rgb)
 
     mean_rgb, std_dev_rgb = cv2.meanStdDev(image_original_rgb, mask=mask_image)
     mean_hsv, std_dev_hsv = cv2.meanStdDev(image_original_hsv, mask=mask_image)
@@ -56,7 +54,7 @@ def compare_result_image_with_original(mean, std_dev, original_image, name):
 # threshold a specified color and return the original image
 # showing only the pixels within this range
 def get_masked_image(min_thres, max_thres, image_drawed,
-                     image_original, color_channel):
+                     image_original):
     mask_rgb = cv2.inRange(image_drawed,min_thres,max_thres)
     # this will return only the pixels which are drawed manually
     result_rgb = cv2.bitwise_and(image_original, image_original,
@@ -68,8 +66,8 @@ if __name__ == "__main__":
     path_to_original_image = "photos/DJI_0237.JPG"
     mean_rgb, mean_hsv, std_dev_rgb, std_dev_hsv = get_mean_st_dev(path_to_training_image,
                                     path_to_original_image)
-    print "Mean RGB\n" + str(mean_rgb)
-    print "StdDev RGB\n" + str(std_dev_rgb)
+    print("Mean RGB\n" + str(mean_rgb))
+    print("StdDev RGB\n" + str(std_dev_rgb))
 
-    print "\n\nMean HSV\n" + str(mean_hsv)
-    print "StdDev HSV\n" + str(std_dev_hsv)
+    print("\n\nMean HSV\n" + str(mean_hsv))
+    print("StdDev HSV\n" + str(std_dev_hsv))
