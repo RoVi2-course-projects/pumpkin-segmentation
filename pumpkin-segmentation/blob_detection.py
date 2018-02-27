@@ -48,9 +48,9 @@ def blob_detection(imgRGB, imgBinary):
     cv2.drawContours(imgRGB, filtered_contours, -1, (0, 0, 255), 3)
     
     #Priting out: number of contours and pumpkins
-    print("Number of contours detected: %d" % len(contours))  
-    print("Number of pumpkins detected: %d" % len(filtered_contours))
-    print("Number of pumpkins estimated based on mean area: %d" % pumpkins_estimated)
+    # print("Number of contours detected: %d" % len(contours))
+    # print("Number of pumpkins detected: %d" % len(filtered_contours))
+    # print("Number of pumpkins estimated based on mean area: %d" % pumpkins_estimated)
 
     #Print the image
     #plt.figure("name of the figure")
@@ -60,7 +60,7 @@ def blob_detection(imgRGB, imgBinary):
     #Write the image
     cv2.imwrite("./photos/blob_detection.png", imgRGB)    
     
-    return imgBlobDetected
+    return (pumpkins_estimated, imgBlobDetected)
 
 if __name__ == "__main__":
     

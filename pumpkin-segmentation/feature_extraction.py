@@ -7,14 +7,19 @@ from PIL import Image
 
 def get_property_from_file(image, property):
     # Get the corresponding tag for the selected property.
+    altitude = 0
     if property == 'altitude':
         keyword = 'drone-dji:RelativeAltitude="'
     # Go over the image XMP data
     for segment, content in image.applist:
-        marker, body = content.split('\x00', 1)
+        marker, body_enc = content.split('\x00'.encode(), 1)
+        try:
+            body = body_enc.decode()
+        except UnicodeDecodeError:
+            pass
         # Work only with the relevant field of the XMP data
         if (segment == 'APP1'
-                and marker == 'http://ns.adobe.com/xap/1.0/'):
+                and marker.decode() == 'http://ns.adobe.com/xap/1.0/'):
             # When the keyword is found, extract the corresponding value.
             if keyword in body:
                 altitude = body[body.index(keyword)+len(keyword) : 
