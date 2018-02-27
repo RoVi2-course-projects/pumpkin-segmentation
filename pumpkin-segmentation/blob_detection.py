@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def estimatePumpkins(contours, total_area):
+def estimatePumpkins(filtered_contours, total_area):
     #calculating mean area for a pumpkin
     mean_area = total_area/len(filtered_contours)
     
@@ -22,21 +22,13 @@ def estimatePumpkins(contours, total_area):
             
     return estimated_pumpkins_nr
 
-if __name__ == "__main__":
-    
-    #Read original photo
-    imageBGR = cv2.imread("./photos/DJI_0237.JPG")
-    imageRGB = cv2.cvtColor(imageBGR, cv2.COLOR_BGR2RGB)
-
-    #Read color based segemented image
-    binaryImage = 255*cv2.imread("photos/result.png", 0)
-
+def blob_detection(imgRGB, imgBinary):
     #Morphological filtering to seprate joint groups and get rid of the noise
     kernel = np.ones((3, 3), np.uint8)
-    erodedImage = cv2.erode(binaryImage, kernel, iterations = 1)
+    imgEroded = cv2.erode(imgBinary, kernel, iterations = 1)
 
     #Find contours in the image
-    im2, contours, hierarchy = cv2.findContours(erodedImage, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)   
+    im2, contours, hierarchy = cv2.findContours(imgEroded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)   
    
     #Filter detected contours, save the remaing in filtered_contours array
     filtered_contours = []
@@ -52,7 +44,8 @@ if __name__ == "__main__":
     pumpkins_estimated = estimatePumpkins(filtered_contours, total_area)
  
     #Draw contours of groups expected to be pumpkins
-    cv2.drawContours(imageRGB, filtered_contours, -1, (0, 0, 255), 3)
+    imgBlobDetected = imgRGB.copy()
+    cv2.drawContours(imgRGB, filtered_contours, -1, (0, 0, 255), 3)
     
     #Priting out: number of contours and pumpkins
     print("Number of contours detected: %d" % len(contours))  
@@ -60,10 +53,25 @@ if __name__ == "__main__":
     print("Number of pumpkins estimated based on mean area: %d" % pumpkins_estimated)
 
     #Print the image
-    plt.figure("name of the figure")
-    plt.imshow(imageRGB)
-    plt.show()
+    #plt.figure("name of the figure")
+    #plt.imshow(imgRGB)
+    #plt.show()
     
     #Write the image
-    cv2.imwrite("./photos/blob_detection.png", imageRGB)
+    cv2.imwrite("./photos/blob_detection.png", imgRGB)    
+    
+    return imgBlobDetected
+
+if __name__ == "__main__":
+    
+    #Read original photo
+    imageBGR = cv2.imread("./photos/DJI_0237.JPG")
+    imageRGB = cv2.cvtColor(imageBGR, cv2.COLOR_BGR2RGB)
+
+    #Read color based segemented image
+    binaryImage = 255*cv2.imread("photos/result.png", 0)
+    
+    blob_detection(imageRGB, binaryImage)
+    
+    
 
